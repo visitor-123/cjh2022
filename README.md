@@ -1,5 +1,5 @@
 # 中国滑稽大学(University of Ridiculous of China)健康打卡平台自动打卡脚本
- 
+
 ![Auto-report action](https://github.com/Violin9906/USTC-ncov-AutoReport/workflows/Auto-report%20action/badge.svg?branch=master&event=schedule)
 ![School](https://img.shields.io/badge/School-URC-blue.svg)
 ![Language](https://img.shields.io/badge/language-Python3-yellow.svg)
@@ -8,13 +8,16 @@
 
 ## 说明
 
-**本打卡脚本仅供学习交流使用，请勿过分依赖。开发者对使用或不使用本脚本造成的问题不负任何责任，不对脚本执行效果做出任何担保，原则上不提供任何形式的技术支持。**
+**本打卡脚本仅供学习交流使用，请勿过分依赖。开发者对使用或不使用本脚本造成的问题不负任何责任，不对脚本执行效果做出任何担保，原则上不提供任何形式的技术支持。该版本相对于原版本做了如下修改：补充了login的data，使程序能成功登录现在的系统；将data.json改为山西省大同市相应的数据；根据原版本的pull requests进行了正则表达式以及http->https的改变；改变了requests，json，以及bs4的import顺序，解决了本地终端运行的NameError问题，现亲测本地可以成功运行，action方法也可；增加了验证码识别模块，可以应对新版身份认证系统的验证码机制。**
+
+## 注意
+中国科学技术大学身份认证系统自8月19日起对不常见IP采取了验证码，现在已破解，抽象成了一个类，代码是ustclogin.py。report.py已做了相应更改，可以照常使用。另外，目前身份认证有一个漏洞：在获取认证界面后再获取验证码图片，然后post的表单showCode填0，验证码放空即可直接跳过验证码。对应模块是ustclogin2.py，但是这个漏洞随时可能被修复，故没有放进代码。如果想整合，把report.py开头的from ustclogin改为 from ustclogin2即可
 
 ## 更新记录
 
 - 20200831：增强稳定性
 - 20200827：增加打卡失败重试功能，增加License
-- 20200826：为配合学校最新规定，切换至Github Actions实现一天三次打卡
+- 20200826：为配合学校最新规定，切换至Github Actions实现一天三次打卡（在这个fork版本中改回了一次）
 
 ## 使用方法
 
@@ -22,7 +25,7 @@
 
 1. 将本代码仓库fork到自己的github。
 
-2. 根据自己的实际情况修改`data.json`的数据，参看下文。这里给出了东、西、南、北、中五个校区正常在校的模板，默认的`data.json`是西区正常在校。**开发者不保证这些模板的正确性。**
+2. 根据自己的实际情况修改`data.json`的数据，参看下文。默认的`data.json`是山西省大同市（离校）。**开发者不保证这些模板的正确性。**
 
 3. 将修改好的代码push至master分支。如果不需要修改 `data.json`，请在 `README.md` 里添加一个空格并push，否则不会触发之后的步骤。**请在自己的仓库中修改，不要pull request到本仓库！**
 
@@ -32,7 +35,7 @@
 
    ![secrets](imgs/image-20200826215037042.png)
 
-6. 默认的打卡时间是每天的早上7:30、中午12:30和晚上19:30，可能会有数分钟的浮动。如需选择其它时间，可以修改`.github/workflows/report.yml`中的`cron`，详细说明参见[安排的事件](https://docs.github.com/cn/actions/reference/events-that-trigger-workflows#scheduled-events)，请注意这里使用的是**国际标准时间UTC**，北京时间的数值比它大8个小时。建议修改默认时间，避开打卡高峰期以提高成功率。
+6. 默认的打卡时间是每天的上午8:15，可能会有数分钟的浮动。如需选择其它时间，可以修改`.github/workflows/report.yml`中的`cron`，详细说明参见[安排的事件](https://docs.github.com/cn/actions/reference/events-that-trigger-workflows#scheduled-events)，请注意这里使用的是**国际标准时间UTC**，北京时间的数值比它大8个小时。建议修改默认时间，避开打卡高峰期以提高成功率。
 
 7. 在Actions选项卡可以确认打卡情况。如果打卡失败（可能是临时网络问题等原因），脚本会自动重试，五次尝试后如果依然失败，将返回非零值提示构建失败。
 
