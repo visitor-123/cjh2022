@@ -1,5 +1,6 @@
-import time
+#import time
 import datetime
+from datetime import date
 import re
 import argparse
 from bs4 import BeautifulSoup
@@ -39,6 +40,7 @@ class Report(object):
 
             url = "https://weixine.ustc.edu.cn/2020/daliy_report"
             resp=login.session.post(url, data=data, headers=headers)
+            #to check if report success
             data = login.session.get("https://weixine.ustc.edu.cn/2020").text
             soup = BeautifulSoup(data, 'html.parser')
             pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
@@ -59,6 +61,21 @@ class Report(object):
                 print("Report FAILED!")
             else:
                 print("Report SUCCESSFUL!")
+
+                # apply to go outside
+
+                start_date = date.today()
+                if start_date.weekday() == 1:
+                    end_date = start_date + datetime.timedelta(days=7)
+                    start_date = start_date.isoformat()
+                    end_date = end_date.isoformat()
+                    data2 = {
+                        '_token': 'QGLTCZytt7eWK9e6a5Rt3JNwXGZhvWoPizRz9e3S',
+                        'start_date': start_date,
+                        'end_date': end_date
+                    }
+                    url2 = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+                    resp2 = login.session.post(url, data=data2, headers=headers)
             return flag
         else:
             return False
