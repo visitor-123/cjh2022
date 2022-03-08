@@ -48,10 +48,10 @@ class Report(object):
                 "span", {"style": "position: relative; top: 5px; color: #666;"})
             flag = False
             if pattern.search(token.text) is not None:
-                date = pattern.search(token.text).group()
-                print("Latest report: " + date)
-                date = date + " +0800"
-                reporttime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
+                date1 = pattern.search(token.text).group()
+                print("Latest report: " + date1)
+                date1 = date1 + " +0800"
+                reporttime = datetime.datetime.strptime(date1, "%Y-%m-%d %H:%M:%S %z")
                 timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
                 delta = timenow - reporttime
                 print("{} second(s) before.".format(delta.seconds))
