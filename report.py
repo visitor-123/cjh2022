@@ -21,7 +21,7 @@ class Report(object):
             soup = BeautifulSoup(data, 'html.parser')
             token = soup.find("input", {"name": "_token"})['value']
 
-            with open(self.data_path, "r+") as f:
+            with open(self.data_path, "r+", encoding='utf-8') as f:
                 data = f.read()
                 data = json.loads(data)
                 data["_token"]=token
@@ -66,7 +66,7 @@ class Report(object):
 
                 start_date = date.today()
                 if start_date.weekday() == 1:
-                    end_date = start_date + datetime.timedelta(days=7)
+                    end_date = start_date + datetime.timedelta(days=6)
                     start_date = start_date.isoformat()
                     end_date = end_date.isoformat()
                     data2 = {
@@ -74,6 +74,7 @@ class Report(object):
                         'start_date': start_date,
                         'end_date': end_date
                     }
+                    print(data2)
                     url2 = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
                     resp2 = login.session.post(url, data=data2, headers=headers)
             return flag
