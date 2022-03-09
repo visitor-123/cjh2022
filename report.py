@@ -20,6 +20,7 @@ class Report(object):
             data = data.encode('ascii','ignore').decode('utf-8','ignore')
             soup = BeautifulSoup(data, 'html.parser')
             token = soup.find("input", {"name": "_token"})['value']
+            token1 = token
 
             with open(self.data_path, "r+", encoding='utf-8') as f:
                 data = f.read()
@@ -40,7 +41,11 @@ class Report(object):
 
             url = "https://weixine.ustc.edu.cn/2020/daliy_report"
             resp=login.session.post(url, data=data, headers=headers)
+
+            print(token1)
+
             #to check if report success
+
             data = login.session.get("https://weixine.ustc.edu.cn/2020").text
             soup = BeautifulSoup(data, 'html.parser')
             pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
@@ -63,20 +68,63 @@ class Report(object):
                 print("Report SUCCESSFUL!")
 
                 # apply to go outside
-
+                '''
                 start_date = date.today()
-                if start_date.weekday() == 1:
+                if start_date.weekday() == 2:
                     end_date = start_date + datetime.timedelta(days=6)
                     start_date = start_date.isoformat()
                     end_date = end_date.isoformat()
+                    data = login.session.get('https://weixine.ustc.edu.cn/2020/apply/daliy').text
+                    data = data.encode('ascii', 'ignore').decode('utf-8', 'ignore')
+                    soup = BeautifulSoup(data, 'html.parser')
+                    token = soup.find("input", {"name": "_token"})['value']
+                    token2 = token
                     data2 = {
-                        '_token': 'QGLTCZytt7eWK9e6a5Rt3JNwXGZhvWoPizRz9e3S',
+                        "_token": token2,
+                        "start_date": start_date,
+                        "end_date": end_date
+                    }
+                    print(data2)
+                    headers2 = {
+                        'authority': 'weixine.ustc.edu.cn',
+                        'upgrade-insecure-requests': '1',
+                        'content-type': 'text/html; charset=UTF-8',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'referer': 'https://weixine.ustc.edu.cn/2020/home',
+                        'accept-language': 'zh-CN,zh;q=0.9',
+                        'cookie': "PHPSESSID=" + login.cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + login.cookies.get(
+                            "XSRF-TOKEN") + ";laravel_session=" + login.cookies.get("laravel_session"),
+                    }
+                    url2 = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+                    resp2 = login.session.post(url2, data=data2, headers=headers2)
+                    print(resp2.text)
+                    print(resp2.url)
+                    '''
+                ret = login.session.get("https://weixine.ustc.edu.cn/2020/apply/daliy", allow_redirects=False)
+                print(ret.status_code)
+                print(ret.url)
+                if (ret.status_code == 200):
+                    # 每日报备
+                    print("开始例行报备.")
+                    data = ret.text
+                    data = data.encode('ascii', 'ignore').decode('utf-8', 'ignore')
+                    soup = BeautifulSoup(data, 'html.parser')
+                    token2 = soup.find("input", {"name": "_token"})['value']
+                    start_date = soup.find("input", {"id": "start_date"})['value']
+                    end_date = soup.find("input", {"id": "end_date"})['value']
+
+                    print("{}---{}".format(start_date, end_date))
+
+                    REPORT_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
+                    REPORT_DATA = {
+                        '_token': token2,
                         'start_date': start_date,
                         'end_date': end_date
                     }
-                    print(data2)
-                    url2 = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
-                    resp2 = login.session.post(url, data=data2, headers=headers)
+
+                    ret = login.session.post(url=REPORT_URL, data=REPORT_DATA)
+
             return flag
         else:
             return False
