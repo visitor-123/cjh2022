@@ -13,6 +13,7 @@ class Report(object):
         self.password = password
         self.data_path = data_path
 
+    @property
     def report(self):
         login=Login(self.stuid,self.password,'https://weixine.ustc.edu.cn/2020','https://weixine.ustc.edu.cn/2020/caslogin','https://weixine.ustc.edu.cn/2020/home')
         if login.login():
@@ -68,9 +69,10 @@ class Report(object):
                 print("Report SUCCESSFUL!")
 
                 # apply to go outside
-                '''
+
                 start_date = date.today()
-                if start_date.weekday() == 2:
+                if start_date.weekday() == 3:
+                    print("Day to apply to go outside, trying to apply")
                     end_date = start_date + datetime.timedelta(days=6)
                     start_date = start_date.isoformat()
                     end_date = end_date.isoformat()
@@ -86,44 +88,34 @@ class Report(object):
                     }
                     print(data2)
                     headers2 = {
-                        'authority': 'weixine.ustc.edu.cn',
-                        'upgrade-insecure-requests': '1',
-                        'content-type': 'text/html; charset=UTF-8',
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
-                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        'referer': 'https://weixine.ustc.edu.cn/2020/home',
-                        'accept-language': 'zh-CN,zh;q=0.9',
                         'cookie': "PHPSESSID=" + login.cookies.get("PHPSESSID") + ";XSRF-TOKEN=" + login.cookies.get(
                             "XSRF-TOKEN") + ";laravel_session=" + login.cookies.get("laravel_session"),
                     }
                     url2 = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
                     resp2 = login.session.post(url2, data=data2, headers=headers2)
-                    print(resp2.text)
-                    print(resp2.url)
-                    '''
-                ret = login.session.get("https://weixine.ustc.edu.cn/2020/apply/daliy", allow_redirects=False)
-                print(ret.status_code)
-                print(ret.url)
-                if (ret.status_code == 200):
-                    # 每日报备
-                    print("开始例行报备.")
-                    data = ret.text
-                    data = data.encode('ascii', 'ignore').decode('utf-8', 'ignore')
+
+                    # to check if apply success
+
+                    data = login.session.get("https://weixine.ustc.edu.cn/2020/apply_total").text
                     soup = BeautifulSoup(data, 'html.parser')
-                    token2 = soup.find("input", {"name": "_token"})['value']
-                    start_date = soup.find("input", {"id": "start_date"})['value']
-                    end_date = soup.find("input", {"id": "end_date"})['value']
-
-                    print("{}---{}".format(start_date, end_date))
-
-                    REPORT_URL = "https://weixine.ustc.edu.cn/2020/apply/daliy/post"
-                    REPORT_DATA = {
-                        '_token': token2,
-                        'start_date': start_date,
-                        'end_date': end_date
-                    }
-
-                    ret = login.session.post(url=REPORT_URL, data=REPORT_DATA)
+                    pattern = re.compile("202[0-9]-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")
+                    token = soup.find("table")
+                    flag = False
+                    if pattern.search(token.text) is not None:
+                        date1 = pattern.search(token.text).group()
+                        print("Latest apply: " + date1)
+                        date1 = date1 + " +0800"
+                        reporttime = datetime.datetime.strptime(date1, "%Y-%m-%d %H:%M:%S %z")
+                        timenow = datetime.datetime.now(pytz.timezone('Asia/Shanghai'))
+                        delta = timenow - reporttime
+                        print("{} second(s) before.".format(delta.seconds))
+                        if delta.seconds < 120:
+                            flag = True
+                    if flag == False:
+                        print("Report FAILED!")
+                    else:
+                        print("Report SUCCESSFUL!")
 
             return flag
         else:
@@ -139,7 +131,7 @@ if __name__ == "__main__":
     autorepoter = Report(stuid=args.stuid, password=args.password, data_path=args.data_path)
     count = 5
     while count != 0:
-        ret = autorepoter.report()
+        ret = autorepoter.report
         if ret != False:
             break
         print("Report Failed, retry...")
