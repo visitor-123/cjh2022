@@ -60,7 +60,7 @@ python report.py [DATA] [STUID] [PASSWORD]
 ```
 其中，`[DATA]`是存放打卡数据的json文件的路径，`[STUID]`是学号，`[PASSWORD]`是统一身份认证的密码明文。
 
-## data.json 数据获取方法
+## data.json 数据 获取方法
 
 使用 F12 开发者工具抓包之后得到数据，按照 json 格式写入 `data.json` 中。
 
