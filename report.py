@@ -71,7 +71,7 @@ class Report(object):
                 # apply to go outside
 
                 start_date = date.today()
-                if start_date.weekday() == 3:
+                if 1:
                     print("Day to apply to go outside, trying to apply")
                     end_date = start_date + datetime.timedelta(days=6)
                     start_date = start_date.isoformat()
